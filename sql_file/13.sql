@@ -23,11 +23,11 @@ DROP TABLE IF EXISTS `sensor`;
 CREATE TABLE `sensor` (
   `id` varchar(26) NOT NULL COMMENT '传感器唯一标识，结构为 sink_id+''_''+sensor_id',
   `sensor_id` varchar(5) NOT NULL COMMENT '一个发布节点分配给传感器的内部id',
-  `sink_id` varchar(20) NOT NULL COMMENT 'sink表外键',
+  `sink_id` varchar(20) NOT NULL COMMENT '外键，指向sink表中的id',
   `name` varchar(100) NOT NULL COMMENT '传感器名字',
   `data_time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT '接受数据的时间',
   `sample_frame` int(11) NOT NULL COMMENT '接受数据的频率(s/次)',
-  `type_id` int(11) default NULL COMMENT 'type表外键',
+  `type_id` int(11) default NULL COMMENT '外键，指向type表中的id',
   PRIMARY KEY  (`id`),
   KEY `sink_id` (`sink_id`),
   KEY `type_id` (`type_id`),
@@ -42,10 +42,9 @@ CREATE TABLE `sensor` (
 DROP TABLE IF EXISTS `sink`;
 
 CREATE TABLE `sink` (
-  `id` varchar(20) NOT NULL COMMENT '发布节点的唯一标识',
-  `user_id` varchar(14) default NULL COMMENT '外键',
+  `id` varchar(20) NOT NULL COMMENT '发布节点的唯一标识，由服务器随机分配，等同于序列号',
+  `user_id` varchar(14) default NULL COMMENT '外键，指向user表中的id',
   `name` varchar(100) NOT NULL COMMENT '节点名字',
-  `serial` varchar(30) default NULL COMMENT '节点序列号',
   PRIMARY KEY  (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `sink_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
@@ -78,6 +77,7 @@ DROP TABLE IF EXISTS `type`;
 CREATE TABLE `type` (
   `id` int(11) NOT NULL auto_increment COMMENT '传感器类型的标识',
   `name` varchar(20) NOT NULL COMMENT '传感器类型',
+  `unit_symbol` varchar(50) NOT NULL COMMENT '数据的单位符号，比如温度传感器单位为‘℃’',
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -88,7 +88,7 @@ CREATE TABLE `type` (
 DROP TABLE IF EXISTS `user`;
 
 CREATE TABLE `user` (
-  `id` varchar(14) NOT NULL COMMENT '用户的唯一标识',
+  `id` varchar(14) NOT NULL COMMENT '用户的唯一标识，有用户注册时提供',
   `password` varchar(100) NOT NULL COMMENT '密码（6-15位）',
   `email` varchar(255) default NULL COMMENT '用户关联邮箱',
   `reg_time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT '注册的时间',
